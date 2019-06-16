@@ -75,11 +75,28 @@ hook.Add("PlayerButtonUp","ZoneToolDragKeyUp", TOOL.PlayerButtonUp)
 
 function TOOL:ProcessInput()
 	if CLIENT or (SERVER and IsFirstTimePredicted()) then
-		--is KeyTable exists && info table for requested button exists && specified key is being help down && is a one time press (false=run as long as key is held down; true=run once on key press) 
-		if(self:GetOwner().KeyTable && self:GetOwner().KeyTable[MOUSE_LEFT] && self:GetOwner().KeyTable[MOUSE_LEFT][1] && !self:GetOwner().KeyTable[MOUSE_LEFT][2]) then
-
+		if self:GetToolMode() == self.Modes.Create then
+			--is KeyTable exists && info table for requested button exists && specified key is being help down && is a one time press (false=run as long as key is held down; true=run once on key press) 
+			if(self:GetOwner().KeyTable && self:GetOwner().KeyTable[MOUSE_LEFT] && self:GetOwner().KeyTable[MOUSE_LEFT][1] && !self:GetOwner().KeyTable[MOUSE_LEFT][2]) then
+				self.CurrentBox.Min = self:GetOwner():GetPos()
+				if (self.CurrentBox.Min and self.CurrentBox.Max) then
+					self:UpdateEnt()
+				end
+				self:GetOwner().KeyTable[2]=true
+			end
+			if(self:GetOwner().KeyTable && self:GetOwner().KeyTable[MOUSE_RIGHT] && self:GetOwner().KeyTable[MOUSE_RIGHT][1] && !self:GetOwner().KeyTable[MOUSE_RIGHT][2]) then
+				self.CurrentBox.Max = self:GetOwner():GetPos()
+				if (self.CurrentBox.Min and self.CurrentBox.Max) then
+					self:UpdateEnt()
+				end
+				self:GetOwner().KeyTable[MOUSE_RIGHT][2]=true
+			end
 		end
 	end
+end
+
+function TOOL:UpdateEnt()
+
 end
 
 function TOOL:Think()

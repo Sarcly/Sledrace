@@ -16,17 +16,25 @@ function ENT:Initialize()
 end
 
 function ENT:Think()
-	if(!IsValid(self:GetParent())) then
+	if(!IsValid(self.Parent)) then
 		print(self.PhysCollide)
 		self:Remove()
 		print("removing..")
 	end
     if CLIENT then
-        if(self.P1 and self.P2) then
+		if(self.P1 and self.P2 and IsValid(self:GetParent())) then
+			print(self:GetPos())
             self:SetRenderBounds(self.P1,self.P2 + Vector(1, 1, 1))
         end
 	end
 end
+
+
+--[[
+	REFACTOR TO BE NOT AN EXCLUSIVELY CLIENTSIDE ENTITY
+	MAKE IT NETWORKED, BUT HAVE THE LOCALPLAYER SET THEIR OWN VALUE OF IT, THEN IN THINK OR SOMETHING ELSE HAVE IT PUSH THE CLIENT'S VERSION TO THE SERVER'S NETWORKEDVAR.
+	*** DO NOT RENDER THE NETWORKEDVAR ON THE CLIENT ***
+]]
 
 function ENT:TestCollision(startpos, delta, isbox, extents)
 	--if CLIENT then print("physcollide",self.PhysCollide)	 end
@@ -74,12 +82,11 @@ end
 function ENT:DrawTranslucent()
     cam.Start3D()
 		render.SetColorMaterial()
-		print(self.P1,self.P2)
-		render.DrawBox(self:GetParent():GetPos(),self:GetAngles(),self.P1,self.P2,self:GetColor())
+		--render.DrawBox(self:GetParent():GetPos(),self:GetAngles(),self.P1,self.P2,self:GetColor())
 		local render1, render2 = self:GetRenderBounds()
 		render.DrawWireframeBox(self:GetParent():GetPos(),self:GetAngles(), render1,render2,self:GetColor())
         local vec1, vec2 = self:GetCollisionBounds()
         -- render.DrawWireframeSphere(LerpVector(0.5,self:GetParent():GetPos()+vec1,self:GetParent():GetPos()+vec2),5,10,10)
-        -- render.DrawSphere(LerpVector(0.5,self:GetPos()+self.P1,self:GetPos()+self.P2),5,10,10)
+        render.DrawWireframeSphere(LerpVector(0.5,self:GetParent():GetPos()+self.P1,self:GetParent():GetPos()+self.P2),5,10,10)
     cam.End3D()
 end
