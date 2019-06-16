@@ -1,0 +1,19 @@
+"sledrace"
+{
+    "base" "sandbox"
+    "title" "Sledrace!"
+    "maps" "^slr_"
+    "menusystem" "1"
+
+    "settings"
+    {
+        1
+        {
+            "name"  "slr_test"
+            "text" "Testin!"
+            "help" "tost"
+            "type" "CheckBox"
+            "default" "1"
+        }
+    }
+}
