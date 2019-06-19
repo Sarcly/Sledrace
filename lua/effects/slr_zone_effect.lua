@@ -1,28 +1,30 @@
 AddCSLuaFile()
-ENT.Type="anim"
-ENT.Base = "base_anim"
-ENT.Spawnable=false
-ENT.Category="Sledrace!"
-ENT.Author="Sarcly & Intox"
-ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
-function ENT:Initialize()
-	self:SetModel("")
-	self:SetMoveType(MOVETYPE_NONE)
-	self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
-	self:SetSolid(SOLID_VPHYSICS)
-	self:DrawShadow(false)
-    self:SetColor(Color(0,0,0,120))
+function EFFECT:Init(effectData)
+	--update corner logic
+	local P1_C = Vector()
+	P1_C:Set(effectData.P1)
+	local P2_C = Vector()
+	P2_C:Set(effectData.P2)
+	local principle_axis = P1.x == P2.x and "x" or (P1.y == P2.y and "y" or "z")
+	self.principal_axis = principle_axis == "x" and 1 or (principle_axis == "y" and 2 or 3)
+	self.P1=P1
+	self.P2=P2
+	OrderVectors(P1_C, P2_C)
+	self.PhysCollide = CreatePhysCollideBox(P1_C, P2_C + Vector(1, 1, 1))
+	print(self.PhysCollide)
+	self:SetCollisionGroup(COLLISION_GROUP_NONE)
+	self:SetCollisionBoundsWS(self:GetParent():GetPos()+self.P1,self:GetParent():GetPos()+self.P2 + Vector(1, 1, 1))
+	self:EnableCustomCollisions(true)
 end
 
-function ENT:Think()
-	--print(self:GetParent())
-	-- if(!IsValid(self:GetParent())) then
-	-- 	print(self:GetParent())
-	-- 	print(self.PhysCollide)
-	-- 	self:Remove()
-	-- 	print("removing..")
-	-- end
+function EFFECT:Think()
+	if(!IsValid(self:GetParent())) then
+		print(self:GetParent())
+		print(self.PhysCollide)
+		self:Remove()
+		print("removing..")
+	end
 	if CLIENT then
 		--print(self.Parent:GetPos()+self:GetPos()+self.P1,self.Parent:GetPos()+self:GetPos()+self.P2 + Vector(1, 1, 1))
 		if(self.P1 and self.P2 and IsValid(self:GetParent())) then
@@ -31,14 +33,7 @@ function ENT:Think()
 	end
 end
 
-
---[[
-	REFACTOR TO BE NOT AN EXCLUSIVELY CLIENTSIDE ENTITY
-	MAKE IT NETWORKED, BUT HAVE THE LOCALPLAYER SET THEIR OWN VALUE OF IT, THEN IN THINK OR SOMETHING ELSE HAVE IT PUSH THE CLIENT'S VERSION TO THE SERVER'S NETWORKEDVAR.
-	*** DO NOT RENDER THE NETWORKEDVAR ON THE CLIENT ***
-]]
-
-function ENT:TestCollision(startpos, delta, isbox, extents)
+function EFFECT:TestCollision(startpos, delta, isbox, extents)
 	print(self)
 	print("testing collision")
 	if not IsValid(self.PhysCollide) then return end
@@ -62,25 +57,12 @@ function ENT:TestCollision(startpos, delta, isbox, extents)
 
 end
 
-function ENT:UpdateCorners(P1, P2)
-	local P1_C = Vector()
-	P1_C:Set(P1)
-	local P2_C = Vector()
-	P2_C:Set(P2)
-	local principle_axis = P1.x == P2.x and "x" or (P1.y == P2.y and "y" or "z")
-	self.principal_axis = principle_axis == "x" and 1 or (principle_axis == "y" and 2 or 3)
-	self.P1=P1
-	self.P2=P2
-	OrderVectors(P1_C, P2_C)
-	self.PhysCollide = CreatePhysCollideBox(P1_C, P2_C + Vector(1, 1, 1))
-	print(self.PhysCollide)
-	self:SetCollisionGroup(COLLISION_GROUP_NONE)
-	self:SetCollisionBoundsWS(self:GetParent():GetPos()+self.P1,self:GetParent():GetPos()+self.P2 + Vector(1, 1, 1))
-	self:EnableCustomCollisions(true)
+function EFFECT:UpdateCorners(P1, P2)
+
 end
 
-function ENT:DrawTranslucent()
 
+function EFFECT:Render()
     cam.Start3D()
 		render.SetColorMaterial()
 		--render.DrawBox(self:GetParent():GetPos(),self:GetAngles(),self.P1,self.P2,self:GetColor())

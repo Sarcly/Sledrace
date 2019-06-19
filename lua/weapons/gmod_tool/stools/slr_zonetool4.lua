@@ -50,7 +50,7 @@ function ResetToolMode()
 end 
 
 function TOOL:PlayerButtonDown(key, ply)
-	if CLIENT or (SERVER and IsFirstTimePredicted()) then
+	if CLIENT or (SERVER && IsFirstTimePredicted()) then
 		if (!self.KeyTable) then
 			self.KeyTable = {}
 		end
@@ -66,7 +66,7 @@ end
 hook.Add("PlayerButtonDown", "ZoneToolDragKeyDown", TOOL.PlayerButtonDown)
 
 function TOOL:PlayerButtonUp(key,ply)
-	if CLIENT or (SERVER and IsFirstTimePredicted()) then
+	if CLIENT or (SERVER && IsFirstTimePredicted()) then
 		self.KeyTable[key] = {false, false}
 	end
 end
@@ -74,13 +74,17 @@ end
 hook.Add("PlayerButtonUp","ZoneToolDragKeyUp", TOOL.PlayerButtonUp)
 
 function TOOL:ProcessInput()
-	if CLIENT or (SERVER and IsFirstTimePredicted()) then
+	if CLIENT or (SERVER && IsFirstTimePredicted()) then
 		if self:GetToolMode() == self.Modes.Create then
-			--is KeyTable exists && info table for requested button exists && specified key is being help down && is a one time press (false=run as long as key is held down; true=run once on key press) 
-			if(self:GetOwner().KeyTable && self:GetOwner().KeyTable[MOUSE_LEFT] && self:GetOwner().KeyTable[MOUSE_LEFT][1] && !self:GetOwner().KeyTable[MOUSE_LEFT][2]) then
-				self.CurrentBox.Min = self:GetOwner():GetPos()
-				if (self.CurrentBox.Min and self.CurrentBox.Max) then
-					self:UpdateEnt()
+			--if KeyTable exists && info table for requested button exists && specified key is being help down && is a one time press (false=run as long as key is held down; true=run once on key press) 
+			if (self:GetOwner().KeyTable && self:GetOwner().KeyTable[MOUSE_LEFT] && self:GetOwner().KeyTable[MOUSE_LEFT][1] && !self:GetOwner().KeyTable[MOUSE_LEFT][2]) then
+				if self:GetOwner().KeyTable[KEY_E] && self:GetOwner().KeyTable[KEY_E][1] && !self:GetOwner().KeyTable[KEY_E][2] then
+					print("!!!!!!!!!!")	
+				else
+					self.CurrentBox.Min = self:GetOwner():GetPos()
+					if (self.CurrentBox.Min and self.CurrentBox.Max) then
+						self:UpdateEnt()
+					end
 				end
 				self:GetOwner().KeyTable[2]=true
 			end
@@ -96,7 +100,18 @@ function TOOL:ProcessInput()
 end
 
 function TOOL:UpdateEnt()
+	if CLIENT then
+		if !IsValid(self.CurrentBox.Ent) then
+			self.CurrentBox.Ent = ents.CreateClientside("slr_zone3")
+		end
+		self.CurrentBox.Ent:Setup(self.CurrentBox.Max,self.CurrentBox.Min)
+	end
+end
 
+function TOOL:RemoveEnt()
+	if CLIENT then
+
+	end
 end
 
 function TOOL:Think()
