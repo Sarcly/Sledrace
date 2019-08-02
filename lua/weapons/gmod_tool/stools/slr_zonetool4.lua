@@ -74,26 +74,31 @@ end
 hook.Add("PlayerButtonUp","ZoneToolDragKeyUp", TOOL.PlayerButtonUp)
 
 function TOOL:ProcessInput()
-	if CLIENT or (SERVER && IsFirstTimePredicted()) then
+	if CLIENT or game.SinglePlayer() then
+		if gui && gui.IsGameUIVisible() then
+			return
+		end
 		if self:GetToolMode() == self.Modes.Create then
 			--if KeyTable exists && info table for requested button exists && specified key is being help down && is a one time press (false=run as long as key is held down; true=run once on key press) 
 			if (self:GetOwner().KeyTable && self:GetOwner().KeyTable[MOUSE_LEFT] && self:GetOwner().KeyTable[MOUSE_LEFT][1] && !self:GetOwner().KeyTable[MOUSE_LEFT][2]) then
 				if self:GetOwner().KeyTable[KEY_E] && self:GetOwner().KeyTable[KEY_E][1] && !self:GetOwner().KeyTable[KEY_E][2] then
-					print("!!!!!!!!!!")	
+
 				else
 					self.CurrentBox.Min = self:GetOwner():GetPos()
 					if (self.CurrentBox.Min and self.CurrentBox.Max) then
 						self:UpdateEnt()
 					end
 				end
-				self:GetOwner().KeyTable[2]=true
 			end
 			if(self:GetOwner().KeyTable && self:GetOwner().KeyTable[MOUSE_RIGHT] && self:GetOwner().KeyTable[MOUSE_RIGHT][1] && !self:GetOwner().KeyTable[MOUSE_RIGHT][2]) then
-				self.CurrentBox.Max = self:GetOwner():GetPos()
-				if (self.CurrentBox.Min and self.CurrentBox.Max) then
-					self:UpdateEnt()
+				if self:GetOwner().KeyTable[KEY_E] && self:GetOwner().KeyTable[KEY_E][1] && !self:GetOwner().KeyTable[KEY_E][2] then
+
+				else
+					self.CurrentBox.Max = self:GetOwner():GetPos()
+					if (self.CurrentBox.Min and self.CurrentBox.Max) then
+						self:UpdateEnt()
+					end
 				end
-				self:GetOwner().KeyTable[MOUSE_RIGHT][2]=true
 			end
 		end
 	end
@@ -104,6 +109,7 @@ function TOOL:UpdateEnt()
 		if !IsValid(self.CurrentBox.Ent) then
 			self.CurrentBox.Ent = ents.CreateClientside("slr_zone3")
 		end
+
 		self.CurrentBox.Ent:Setup(self.CurrentBox.Max,self.CurrentBox.Min)
 	end
 end
@@ -115,6 +121,9 @@ function TOOL:RemoveEnt()
 end
 
 function TOOL:Think()
+	if(CLIENT) then 
+		--print(self.CurrentBox.Ent, self.CurrentBox.Ent:GetPos())
+	end
 	self:ProcessInput()
 	if self:GetToolMode() == self.Modes.Loading then
 		self:UpdateToolMode()

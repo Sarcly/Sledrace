@@ -26,7 +26,7 @@ function ENT:Think()
 	if CLIENT then
 		--print(self.Parent:GetPos()+self:GetPos()+self.P1,self.Parent:GetPos()+self:GetPos()+self.P2 + Vector(1, 1, 1))
 		if(self.P1 and self.P2 and IsValid(self:GetParent())) then
-            self:SetRenderBoundsWS(self:GetParent():GetPos()+self.P1,self:GetParent():GetPos()+self.P2 + Vector(1, 1, 1))
+            self:SetRenderBounds(self.P1,self.P2 + Vector(1, 1, 1))
         end
 	end
 end
@@ -39,8 +39,6 @@ end
 ]]
 
 function ENT:TestCollision(startpos, delta, isbox, extents)
-	print(self)
-	print("testing collision")
 	if not IsValid(self.PhysCollide) then return end
 	-- TraceBox expects the trace to begin at the center of the box, but TestCollision is bad
 	local max = extents
@@ -64,16 +62,15 @@ end
 
 function ENT:UpdateCorners(P1, P2)
 	local P1_C = Vector()
-	P1_C:Set(P1)
+	P1_C:Set(self:GetParent():GetPos()-P1)
 	local P2_C = Vector()
-	P2_C:Set(P2)
+	P2_C:Set(self:GetParent():GetPos()-P2)
 	local principle_axis = P1.x == P2.x and "x" or (P1.y == P2.y and "y" or "z")
 	self.principal_axis = principle_axis == "x" and 1 or (principle_axis == "y" and 2 or 3)
-	self.P1=P1
-	self.P2=P2
+	self.P1=self:GetParent():GetPos()-P1
+	self.P2=self:GetParent():GetPos()-P2
 	OrderVectors(P1_C, P2_C)
 	self.PhysCollide = CreatePhysCollideBox(P1_C, P2_C + Vector(1, 1, 1))
-	print(self.PhysCollide)
 	self:SetCollisionGroup(COLLISION_GROUP_NONE)
 	self:SetCollisionBoundsWS(self:GetParent():GetPos()+self.P1,self:GetParent():GetPos()+self.P2 + Vector(1, 1, 1))
 	self:EnableCustomCollisions(true)
@@ -86,12 +83,14 @@ function ENT:DrawTranslucent()
 		--render.DrawBox(self:GetParent():GetPos(),self:GetAngles(),self.P1,self.P2,self:GetColor())
 		render.DrawWireframeSphere(Vector(),10,10,10)
 		local render1, render2 = self:GetRenderBounds()
-		--render.DrawWireframeBox(Vector(),self:GetAngles(),self:GetParent():GetPos()+self.P1,self:GetParent():GetPos()+self.P2 + Vector(1, 1, 1),self:GetColor())
+		-- render.DrawWireframeBox(Vector(),self:GetAngles(),render1,render2,self:GetColor())
+		print(self.P1,self.P2)
+		render.DrawWireframeBox(self:GetParent():GetPos(),self:GetAngles(),self.P1,self.P2+Vector(1,1,1),self:GetColor())
 		--render.DrawBox(self.Parent:GetPos(),self:GetAngles(),self.P1,self.P2 + Vector(1, 1, 1),self:GetColor())
 		--render.DrawWireframeBox(self.Parent:GetPos()+self:GetPos(),self:GetAngles(),render1,render2,self:GetColor())
-		render.DrawWireframeSphere(self:GetPos()+self:GetParent():GetPos(),5,10,10, self:GetColor())
+		render.DrawWireframeSphere(self:GetParent():GetPos()+self:GetPos(),5,10,10, self:GetColor())
 		local vec1, vec2 = self:GetCollisionBounds()
-		render.DrawWireframeBox(Vector(),self:GetAngles(),vec1,vec2,self:GetColor())
+		--render.DrawWireframeBox(self:GetPos(),self:GetAngles(),vec1,vec2,self:GetColor())
 		-- render.DrawWireframeSphere(LerpVector(0.5,self:GetParent():GetPos()+vec1,self:GetParent():GetPos()+vec2),5,10,10)
 		--print(self.Parent:GetPos(),self.P1,self.P2)
 	cam.End3D()
